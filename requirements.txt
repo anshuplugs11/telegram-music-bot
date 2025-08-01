@@ -1,41 +1,36 @@
 # Core Telegram libraries
-pyrogram==2.0.106
-TgCrypto==1.2.5
-py-tgcalls==2.2.5
+pyrogram>=2.0.106
+TgCrypto>=1.2.5
+py-tgcalls>=2.2.5
 
 # YouTube downloading and processing
-yt-dlp==2023.12.30
-youtube-dl==2021.12.17
-
-# Audio/Video processing
-ffmpeg-python==0.2.0
+yt-dlp
+ffmpeg-python
 
 # Database
-aiosqlite==0.19.0
-sqlalchemy==2.0.23
+aiosqlite
+sqlalchemy
 
 # Web framework (for health checks and dashboard)
-flask==3.0.0
-gunicorn==21.2.0
+flask
+gunicorn
 
 # HTTP requests
-aiohttp==3.9.1
-requests==2.31.0
+aiohttp
+requests
 
 # Utilities
-python-dotenv==1.0.0
-asyncio==3.4.3
-motor==3.3.2
+python-dotenv
+motor
 
 # Optional: Music platform APIs
-spotipy==2.23.0
+spotipy
 
 # Logging and monitoring
-colorlog==6.8.0
+colorlog
 
-# Performance
-uvloop==0.19.0
+# Performance (only if compatible)
+uvloop; platform_system != "Windows"
 
 # Additional utilities
-psutil==5.9.6
-pillow==10.1.0
+psutil
