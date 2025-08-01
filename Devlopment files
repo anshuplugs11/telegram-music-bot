@@ -1,0 +1,484 @@
+# Procfile (for Heroku-like deployment)
+web: python run.py
+
+# render.yaml (for Render deployment)
+services:
+  - type: web
+    name: telegram-music-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py
+    plan: free
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: SUDO_USERS
+        sync: false
+      - key: SESSION_STRING
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:///music_bot.db
+      - key: PORT
+        value: 10000
+
+---
+
+# docker-compose.yml (for Docker deployment)
+version: '3.8'
+services:
+  music-bot:
+    build: .
+    container_name: telegram-music-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
+      - SUDO_USERS=${SUDO_USERS}
+      - SESSION_STRING=${SESSION_STRING}
+      - DATABASE_URL=sqlite:///data/music_bot.db
+      - PORT=8000
+    volumes:
+      - ./data:/app/data
+      - ./downloads:/app/downloads
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    networks:
+      - music-bot-network
+
+networks:
+  music-bot-network:
+    driver: bridge
+
+---
+
+# Dockerfile
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p downloads logs data
+
+# Set permissions
+RUN chmod +x run.py
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run the bot
+CMD ["python", "run.py"]
+
+---
+
+# .env.example (Environment variables template)
+# Telegram Bot Configuration
+BOT_TOKEN=your_bot_token_from_botfather
+API_ID=your_api_id_from_my_telegram_org
+API_HASH=your_api_hash_from_my_telegram_org
+
+# Owner Configuration (Your Telegram User ID)
+SUDO_USERS=your_user_id
+
+# Assistant Account (Optional - for better performance)
+SESSION_STRING=your_pyrogram_session_string
+
+# Database Configuration
+DATABASE_URL=sqlite:///music_bot.db
+
+# Optional: Spotify Integration
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+
+# Optional: SoundCloud Integration
+SOUNDCLOUD_CLIENT_ID=your_soundcloud_client_id
+
+# Deployment
+PORT=8000
+
+---
+
+# app.json (for one-click Heroku deployment)
+{
+  "name": "Telegram Music Bot",
+  "description": "A powerful Telegram bot for playing music in voice calls with queue management, speed control, and more features.",
+  "repository": "https://github.com/yourusername/telegram-music-bot",
+  "logo": "https://telegra.ph/file/a5b3c3544fdc81e48e226.jpg",
+  "keywords": [
+    "telegram",
+    "bot",
+    "music",
+    "voice-chat",
+    "youtube",
+    "python"
+  ],
+  "stack": "heroku-22",
+  "env": {
+    "BOT_TOKEN": {
+      "description": "Your bot token from @BotFather",
+      "required": true
+    },
+    "API_ID": {
+      "description": "Your API ID from https://my.telegram.org",
+      "required": true
+    },
+    "API_HASH": {
+      "description": "Your API Hash from https://my.telegram.org",
+      "required": true
+    },
+    "SUDO_USERS": {
+      "description": "Your Telegram User ID (comma separated for multiple users)",
+      "required": true
+    },
+    "SESSION_STRING": {
+      "description": "Pyrogram session string for assistant account (optional but recommended)",
+      "required": false
+    },
+    "DATABASE_URL": {
+      "description": "Database URL (leave default for SQLite)",
+      "value": "sqlite:///music_bot.db",
+      "required": false
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    },
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}
+
+---
+
+# railway.json (for Railway deployment)
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "python run.py",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 300
+  }
+}
+
+---
+
+# .gitignore
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+# Bot specific files
+downloads/
+logs/
+*.session
+*.session-journal
+music_bot.db
+music_bot.db-journal
+bot.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+---
+
+# runtime.txt (for Heroku Python version)
+python-3.11.7
+
+---
+
+# nixpacks.toml (for Railway/Nixpacks)
+[phases.setup]
+nixPkgs = ["python311", "ffmpeg", "git"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = ["python -c 'import pyrogram; print(\"Pyrogram installed successfully\")'"]
+
+[start]
+cmd = "python run.py"
+
+---
+
+# vercel.json (for Vercel deployment - serverless)
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "run.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "run.py"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.11"
+  }
+}
+
+---
+
+# startup.sh (Linux startup script)
+#!/bin/bash
+
+echo "🎵 Starting Telegram Music Bot..."
+
+# Update system packages
+sudo apt-get update
+
+# Install FFmpeg if not present
+if ! command -v ffmpeg &> /dev/null; then
+    echo "📦 Installing FFmpeg..."
+    sudo apt-get install -y ffmpeg
+fi
+
+# Install Python dependencies
+echo "📦 Installing Python dependencies..."
+pip3 install -r requirements.txt
+
+# Create necessary directories
+mkdir -p downloads logs data
+
+# Set permissions
+chmod +x run.py
+
+# Start the bot
+echo "🚀 Starting the bot..."
+python3 run.py
+
+---
+
+# install.sh (Installation script)
+#!/bin/bash
+
+set -e
+
+echo "🎵 Telegram Music Bot Installation Script"
+echo "========================================"
+
+# Check if Python 3.8+ is installed
+if ! command -v python3 &> /dev/null; then
+    echo "❌ Python 3 is not installed. Please install Python 3.8 or higher."
+    exit 1
+fi
+
+PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+REQUIRED_VERSION="3.8"
+
+if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
+    echo "❌ Python $PYTHON_VERSION is installed, but $REQUIRED_VERSION or higher is required."
+    exit 1
+fi
+
+echo "✅ Python $PYTHON_VERSION is installed."
+
+# Install system dependencies
+echo "📦 Installing system dependencies..."
+
+if command -v apt-get &> /dev/null; then
+    # Debian/Ubuntu
+    sudo apt-get update
+    sudo apt-get install -y python3-pip python3-venv ffmpeg git curl
+elif command -v yum &> /dev/null; then
+    # CentOS/RHEL
+    sudo yum install -y python3-pip python3-venv ffmpeg git curl
+elif command -v pacman &> /dev/null; then
+    # Arch Linux
+    sudo pacman -S python-pip ffmpeg git curl
+elif command -v brew &> /dev/null; then
+    # macOS
+    brew install python ffmpeg git curl
+else
+    echo "⚠️  Could not detect package manager. Please install ffmpeg, git, and curl manually."
+fi
+
+# Create virtual environment
+echo "🏗️  Creating virtual environment..."
+python3 -m venv venv
+source venv/bin/activate
+
+# Install Python dependencies
+echo "📦 Installing Python dependencies..."
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Create directories
+echo "📁 Creating directories..."
+mkdir -p downloads logs data
+
+# Copy environment template
+if [ ! -f .env ]; then
+    echo "📋 Creating environment file..."
+    cp .env.example .env
+    echo "⚠️  Please edit .env file with your bot configuration before running!"
+fi
+
+# Set permissions
+chmod +x run.py startup.sh
+
+echo ""
+echo "🎉 Installation completed successfully!"
+echo ""
+echo "📋 Next steps:"
+echo "1. Edit the .env file with your bot token and configuration"
+echo "2. Activate virtual environment: source venv/bin/activate"
+echo "3. Run the bot: python run.py"
+echo ""
+echo "📚 For more information, check the README.md file"
+echo ""
+
+---
+
+
+
+**⭐ Star this repo if you find it useful!**
+
+Made with ❤️ by [Your Name]
