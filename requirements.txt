@@ -1,0 +1,68 @@
+# Core Telegram Bot Framework
+pyrogram==2.0.106
+TgCrypto==1.2.5
+
+# Voice Calls Support
+py-tgcalls==0.9.7
+pytgcalls==3.0.0.dev24
+
+# YouTube and Media Downloading
+yt-dlp==2023.12.30
+youtube-dl==2021.12.17
+
+# Audio/Video Processing
+ffmpeg-python==0.2.0
+
+# Database Support
+aiosqlite==0.19.0
+databases==0.8.0
+SQLAlchemy==2.0.23
+
+# Web Server for Keep Alive
+Flask==3.0.0
+gunicorn==21.2.0
+
+# System Monitoring
+psutil==5.9.6
+
+# HTTP Requests
+aiohttp==3.9.1
+requests==2.31.0
+
+# Utilities
+python-dotenv==1.0.0
+colorlog==6.8.0
+
+# Optional: Music Services Integration
+spotipy==2.22.1
+SoundCloudAPI==0.3.4
+
+# Optional: Advanced Features
+Pillow==10.1.0
+numpy==1.25.2
+
+# Development Tools (optional)
+black==23.12.0
+flake8==6.1.0
+
+# Async Support
+asyncio==3.4.3
+aiofiles==23.2.1
+
+# JSON and Config
+pyyaml==6.0.1
+configparser==6.0.0
+
+# Logging
+loguru==0.7.2
+
+# Date/Time Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Encryption and Security
+cryptography==41.0.8
+bcrypt==4.1.2
+
+# Performance
+uvloop==0.19.0  # For Linux/macOS
