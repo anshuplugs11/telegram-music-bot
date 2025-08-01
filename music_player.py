@@ -7,7 +7,9 @@ import logging
 from typing import Dict, List, Optional, Any
 from pyrogram import Client
 from pyrogram.types import User
-from pytgcalls import PyTgCalls, StreamType
+from pytgcalls import PyTgCalls
+from pytgcalls.types import AudioPiped, VideoPiped
+from pytgcalls.types.input_stream import AudioParameters, VideoParameters
 from pytgcalls.types.input_stream import AudioPiped, VideoPiped
 from pytgcalls.types.input_stream.quality import HighQualityAudio, HighQualityVideo
 from pytgcalls.exceptions import NoActiveGroupCall, NotInGroupCallError
